@@ -1,0 +1,124 @@
+// Configurações iniciais
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Ajustar o tamanho do canvas
+canvas.width = 800;
+canvas.height = 600;
+
+// Propriedades do jogador
+const player = {
+    x: 50,
+    y: canvas.height - 150,
+    width: 50,
+    height: 50,
+    speed: 5,
+    dx: 0,
+    dy: 0,
+    gravity: 0.8,
+    jumpPower: -15,
+    grounded: false
+};
+
+// Propriedades do solo
+const groundHeight = 50;
+const ground = {
+    y: canvas.height - groundHeight,
+    height: groundHeight
+};
+
+// Controle de teclas
+const keys = {
+    right: false,
+    left: false,
+    up: false
+};
+
+// Função para desenhar o jogador
+function drawPlayer() {
+    ctx.fillStyle = 'red';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+}
+
+// Função para desenhar o chão
+function drawGround() {
+    ctx.fillStyle = 'green';
+    ctx.fillRect(0, ground.y, canvas.width, ground.height);
+}
+
+// Função para mover o jogador
+function movePlayer() {
+    if (keys.right) {
+        player.dx = player.speed;
+    } else if (keys.left) {
+        player.dx = -player.speed;
+    } else {
+        player.dx = 0;
+    }
+
+    if (keys.up && player.grounded) {
+        player.dy = player.jumpPower;
+        player.grounded = false;
+    }
+
+    player.x += player.dx;
+    player.y += player.dy;
+
+    // Física do salto (gravidade)
+    if (player.y + player.height < ground.y) {
+        player.dy += player.gravity;
+    } else {
+        player.dy = 0;
+        player.y = ground.y - player.height;
+        player.grounded = true;
+    }
+
+    // Impedir que o jogador saia da tela
+    if (player.x < 0) {
+        player.x = 0;
+    }
+    if (player.x + player.width > canvas.width) {
+        player.x = canvas.width - player.width;
+    }
+}
+
+// Função para gerenciar eventos de teclado
+function keyDown(e) {
+    if (e.key === 'ArrowRight' || e.key === 'd') {
+        keys.right = true;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'a') {
+        keys.left = true;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'w') {
+        keys.up = true;
+    }
+}
+
+function keyUp(e) {
+    if (e.key === 'ArrowRight' || e.key === 'd') {
+        keys.right = false;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'a') {
+        keys.left = false;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'w') {
+        keys.up = false;
+    }
+}
+
+// Função para atualizar o jogo
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGround();
+    movePlayer();
+    drawPlayer();
+    requestAnimationFrame(update);
+}
+
+// Eventos de teclado
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+
+// Iniciar o jogo
+update();
